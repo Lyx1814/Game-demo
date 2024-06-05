@@ -8,16 +8,16 @@
   2. 再初始化遊戲棋盤
      以隨機函數srand(time(NULL));
      將棋盤的範圍內填滿三種顏色 (0, 1, 2)
-  3. 根據使用者輸入的座標來進行移動ss
+  3. 根據使用者輸入的座標來進行移動
   4. 過程中將三個重複的消除，並將上方為消除
      的降下來以填滿底下空格
-  5. 當棋盤內沒有相同的顏色時，則會跳出遊戲
-     並代表遊戲結束
+  5. 當棋盤內沒有相同的顏色時，按英文字母q，
+     則會跳出遊戲並跳出遊戲結束提示
 */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <stdlib.h> // 用於動態分配記憶體
+#include <time.h>   // 用於隨機分布
 
 #define BOARD_WIDTH 5  // y最大為5
 #define BOARD_HEIGHT 5 // x最大為5
@@ -179,31 +179,12 @@ int checkMatches(GameBoard *board)
     return matches;
 }
 
-// 檢查遊戲是否結束（即棋盤中是否有相鄰的顏色可以消除）
-int checkGameEnd(GameBoard *board)
-{
-    for (int x = 0; x < board->width; x++)
-    {
-        for (int y = 0; y < board->height; y++)
-        {
-            if ((x > 0 && board->board[x][y].color == board->board[x - 1][y].color) ||
-                (x < board->width - 1 && board->board[x][y].color == board->board[x + 1][y].color) ||
-                (y > 0 && board->board[x][y].color == board->board[x][y - 1].color) ||
-                (y < board->height - 1 && board->board[x][y].color == board->board[x][y + 1].color))
-            {
-                return 0; // 遊戲還未結束
-            }
-        }
-    }
-    return 1; // 遊戲結束
-}
-
 int main()
 {
     GameBoard *board = createGameBoard(BOARD_WIDTH, BOARD_HEIGHT);
     initGameBoard(board);
     printf("歡迎來到消消樂遊戲!\n");
-    printf("嘗試將 3 個或更多相同顏色的區塊連在一起!\n");
+    printf("嘗試將 3 個相同顏色的方塊連在一起!\n");
     printf("輸入 (x, y) 座標來移動, 或按q結束遊戲\n");
     printf("初始棋盤:\n");
     printGameBoard(board);
@@ -217,7 +198,8 @@ int main()
         printf("第%d次移動, 輸入座標 (x1 y1 x2 y2): ", moves + 1);
         char input[10];
         fgets(input, sizeof(input), stdin); // 讀取玩家輸入的座標
-        if (input[0] == 'q')
+                
+        if (input[0] == 'q' || input[0] == 'Q')
         {
             printf("遊戲結束!");
             break;
@@ -227,7 +209,7 @@ int main()
         // 座標檢查
         if (abs(x1 - x2) + abs(y1 - y2) != 1)
         {
-            printf("Invalid move. Please enter again.\n");
+            printf("輸入座標不相鄰，請重新輸入\n");
             continue;
         }
 
@@ -236,21 +218,16 @@ int main()
 
         moves++;
         printf("移動 %d:\n", moves);
+        printf("移動前\n");
         printGameBoard(board); // 顯示移動後的座標狀態
 
         int matches = checkMatches(board); // 檢查是否有符合消除條件的方塊連線
         if (matches > 0)
         {
-            printf("消除個數: %d\n", matches / 2); // 如果有符合消除條件的方塊連線，則顯示匹配數量
+            printf("移動後\n");
+            printf("連線個數: %d\n", matches); // 如果有符合消除條件的方塊連線，則顯示匹配數量
             printGameBoard(board);                 // 顯示更新後的遊戲棋盤狀態
             matches = checkMatches(board);         // 再次檢查是否還有符合消除條件的方塊連線
-        }
-
-        // 檢查遊戲是否結束
-        if (checkGameEnd(board))
-        {
-            printf("無法再消除方塊，遊戲結束。\n");
-            break;
         }
     }
 
